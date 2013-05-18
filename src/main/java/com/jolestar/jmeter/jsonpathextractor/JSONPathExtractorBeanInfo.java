@@ -13,7 +13,7 @@ import org.apache.jmeter.testbeans.BeanInfoSupport;
  */
 public class JSONPathExtractorBeanInfo extends BeanInfoSupport {
 
-	protected JSONPathExtractorBeanInfo() {
+	public JSONPathExtractorBeanInfo() {
 		super(JSONPathExtractor.class);
 		PropertyDescriptor p;
 		p = property(JSONPathExtractor.JSONPATH);
