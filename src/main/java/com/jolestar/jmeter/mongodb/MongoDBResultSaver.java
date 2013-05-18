@@ -38,13 +38,9 @@ public class MongoDBResultSaver extends AbstractTestElement implements SampleLis
 	
 	public static String FIELD_MONGODB_CONFIG_NAME = "mongoDBConfigName";
 	public static String FIELD_MONGODB_COLLECTION_NAME = "mongoDBCollectionName";
-	
-	private static final String DEFAULT_MONGO_DB_COLLECTION = "jmeter";
 
     public MongoDBResultSaver() {
         super();
-        this.setMongoDBConfigName(MongoDBConfigBeanInfo.Field.varName.defaultValue().toString());
-        this.setMongoDBCollectionName(DEFAULT_MONGO_DB_COLLECTION);
     }
 
     /*

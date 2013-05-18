@@ -34,7 +34,8 @@ public class MongoDBResultSaverGui extends AbstractListenerGui implements Cleara
 	
 	private static final String PROP_DISPLAY_NAME = "displayName";
 	private static final String PROP_SHORT_DESCRIPTION = "shortDescription";
-
+	
+	public static final String DEFAULT_MONGO_DB_COLLECTION = "jmeter";
     
 	/**
 	 * resourceBundle need to be static. because getStaticLabel method be called at super() construct. 
@@ -101,8 +102,8 @@ public class MongoDBResultSaverGui extends AbstractListenerGui implements Cleara
     @Override
     public void clearGui() {
         super.clearGui();
-        this.mongoConfigName.setText("");
-        this.mongoCollectionName.setText("");
+        mongoConfigName.setText(MongoDBConfigBeanInfo.Field.varName.defaultValue().toString());
+        mongoCollectionName.setText(DEFAULT_MONGO_DB_COLLECTION);
     }
 
     private void init() {
