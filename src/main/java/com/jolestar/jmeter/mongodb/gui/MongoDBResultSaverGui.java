@@ -118,7 +118,7 @@ public class MongoDBResultSaverGui extends AbstractListenerGui implements Cleara
     private JPanel createPanel()
     {
     	JPanel panel = new JPanel(new GridLayout(2,2));
-    	String labelStr = resourceBundle.getString(MongoDBResultSaver.FIELD_MONGODB_CONFIG_NAME+"."+PROP_DISPLAY_NAME);
+    	String labelStr = resourceBundle.getString(MongoDBResultSaver.FIELD_MONGODB_CONFIG_NAME+"."+PROP_DISPLAY_NAME)+":";
         JLabel label = new JLabel(labelStr); 
 
         mongoConfigName = new JTextField(10);
@@ -135,7 +135,7 @@ public class MongoDBResultSaverGui extends AbstractListenerGui implements Cleara
         panel.add(label);
         panel.add(mongoConfigName);
         
-        labelStr = resourceBundle.getString(MongoDBResultSaver.FIELD_MONGODB_COLLECTION_NAME+"."+PROP_DISPLAY_NAME);
+        labelStr = resourceBundle.getString(MongoDBResultSaver.FIELD_MONGODB_COLLECTION_NAME+"."+PROP_DISPLAY_NAME)+":";
         label = new JLabel(labelStr); 
         mongoCollectionName = new JTextField(10);
         mongoCollectionName.setName(MongoDBResultSaver.FIELD_MONGODB_COLLECTION_NAME);
