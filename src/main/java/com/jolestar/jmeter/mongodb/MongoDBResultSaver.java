@@ -9,6 +9,7 @@ import java.util.Map;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.jmeter.samplers.SampleEvent;
 import org.apache.jmeter.samplers.SampleListener;
 import org.apache.jmeter.testelement.AbstractTestElement;
@@ -38,6 +39,7 @@ public class MongoDBResultSaver extends AbstractTestElement implements SampleLis
 	
 	public static String FIELD_MONGODB_CONFIG_NAME = "mongoDBConfigName";
 	public static String FIELD_MONGODB_COLLECTION_NAME = "mongoDBCollectionName";
+	public static String FIELD_RESULT_VAR_NAME = "resultVarName";
 
     public MongoDBResultSaver() {
         super();
@@ -73,6 +75,14 @@ public class MongoDBResultSaver extends AbstractTestElement implements SampleLis
 	public void setMongoDBCollectionName(String mongoDBCollectionName){
 		this.setProperty(FIELD_MONGODB_COLLECTION_NAME, mongoDBCollectionName);
 	}
+	
+	public String getResultVarName(){
+		return this.getPropertyAsString(FIELD_RESULT_VAR_NAME);
+	}
+	
+	public void setResultVarName(String resultVarName){
+		this.setProperty(FIELD_RESULT_VAR_NAME, resultVarName);
+	}
 
 	@Override
 	public void sampleOccurred(SampleEvent e) {
@@ -82,14 +92,26 @@ public class MongoDBResultSaver extends AbstractTestElement implements SampleLis
 			log.error("can not find mongo db config with name:"+this.getMongoDBConfigName());
 		}else{
 			log.info("save result to mongodb :"+config.toString());
-			String str = e.getResult().getResponseDataAsString();
-			JSONParser parser = new JSONParser(JSONParser.MODE_JSON_SIMPLE);
-			DBCollection collection = config.getCollection(this.getMongoDBCollectionName());
-			try {
-				Object obj = parser.parse(str);
-				saveObject(obj, collection);
-			} catch (ParseException ex) {
-				log.error("parse json error:"+ex.getMessage()+", responseStr:"+str);
+			String result = null;
+			if(StringUtils.isBlank(this.getResultVarName())){
+				result = e.getResult().getResponseDataAsString();
+			}else{
+				result = variables.get(this.getResultVarName());
+			}
+			if(StringUtils.isBlank(result)){
+				log.error("result is blank.");
+			}else{
+				if(log.isDebugEnabled()){
+					log.debug("result:"+result);
+				}
+				JSONParser parser = new JSONParser(JSONParser.MODE_JSON_SIMPLE);
+				DBCollection collection = config.getCollection(this.getMongoDBCollectionName());
+				try {
+					Object obj = parser.parse(result);
+					saveObject(obj, collection);
+				} catch (ParseException ex) {
+					log.error("parse json error:"+ex.getMessage()+", responseStr:"+result);
+				}
 			}
 		}
 	}
