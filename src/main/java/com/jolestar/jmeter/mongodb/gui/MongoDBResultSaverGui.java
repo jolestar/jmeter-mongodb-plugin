@@ -5,6 +5,7 @@ import java.awt.GridLayout;
 import java.util.ResourceBundle;
 
 import javax.swing.Box;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -32,6 +33,8 @@ public class MongoDBResultSaverGui extends AbstractListenerGui implements Cleara
 	private JTextField mongoConfigName;
 	private JTextField mongoCollectionName;
 	private JTextField resultVarName;
+	private JCheckBox successOnly;
+	private JCheckBox errorsOnly;
 	
 	private static final String PROP_DISPLAY_NAME = "displayName";
 	private static final String PROP_SHORT_DESCRIPTION = "shortDescription";
@@ -97,6 +100,8 @@ public class MongoDBResultSaverGui extends AbstractListenerGui implements Cleara
         te.setProperty(MongoDBResultSaver.FIELD_MONGODB_CONFIG_NAME, this.mongoConfigName.getText());
         te.setProperty(MongoDBResultSaver.FIELD_MONGODB_COLLECTION_NAME,this.mongoCollectionName.getText());
         te.setProperty(MongoDBResultSaver.FIELD_RESULT_VAR_NAME,this.resultVarName.getText());
+        te.setProperty(MongoDBResultSaver.FIELD_SUCCESS_ONLY, this.successOnly.isSelected());
+        te.setProperty(MongoDBResultSaver.FIELD_ERRORS_ONLY, this.errorsOnly.isSelected());
     }
 
     /**
@@ -108,6 +113,8 @@ public class MongoDBResultSaverGui extends AbstractListenerGui implements Cleara
         mongoConfigName.setText(MongoDBConfigBeanInfo.Field.varName.defaultValue().toString());
         mongoCollectionName.setText(DEFAULT_MONGO_DB_COLLECTION);
         this.resultVarName.setText("");
+        this.successOnly.setSelected(true);
+        this.errorsOnly.setSelected(false);
     }
 
     private void init() {
@@ -121,7 +128,7 @@ public class MongoDBResultSaverGui extends AbstractListenerGui implements Cleara
 
     private JPanel createPanel()
     {
-    	JPanel panel = new JPanel(new GridLayout(3,2));
+    	JPanel panel = new JPanel(new GridLayout(5,2));
     	String labelStr = resourceBundle.getString(MongoDBResultSaver.FIELD_MONGODB_CONFIG_NAME+"."+PROP_DISPLAY_NAME)+":";
         JLabel label = new JLabel(labelStr); 
 
@@ -168,6 +175,38 @@ public class MongoDBResultSaverGui extends AbstractListenerGui implements Cleara
  
         panel.add(label);
         panel.add(resultVarName);
+        
+        
+        labelStr = resourceBundle.getString(MongoDBResultSaver.FIELD_SUCCESS_ONLY+"."+PROP_DISPLAY_NAME)+":";
+        label = new JLabel(labelStr); 
+        successOnly = new JCheckBox();
+        successOnly.setName(MongoDBResultSaver.FIELD_SUCCESS_ONLY);
+        tipName = MongoDBResultSaver.FIELD_SUCCESS_ONLY+"."+PROP_SHORT_DESCRIPTION;
+        if(resourceBundle.containsKey(tipName)){
+        	String tip = resourceBundle.getString(tipName);
+        	successOnly.setToolTipText(tip);
+        }
+        
+        label.setLabelFor(successOnly);
+ 
+        panel.add(label);
+        panel.add(successOnly);
+        
+        
+        labelStr = resourceBundle.getString(MongoDBResultSaver.FIELD_ERRORS_ONLY+"."+PROP_DISPLAY_NAME)+":";
+        label = new JLabel(labelStr); 
+        errorsOnly = new JCheckBox();
+        errorsOnly.setName(MongoDBResultSaver.FIELD_ERRORS_ONLY);
+        tipName = MongoDBResultSaver.FIELD_SUCCESS_ONLY+"."+PROP_SHORT_DESCRIPTION;
+        if(resourceBundle.containsKey(tipName)){
+        	String tip = resourceBundle.getString(tipName);
+        	errorsOnly.setToolTipText(tip);
+        }
+        
+        label.setLabelFor(errorsOnly);
+ 
+        panel.add(label);
+        panel.add(errorsOnly);
 
         return panel;
     }

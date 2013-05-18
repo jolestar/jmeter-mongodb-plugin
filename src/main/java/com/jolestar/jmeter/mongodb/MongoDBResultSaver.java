@@ -40,6 +40,8 @@ public class MongoDBResultSaver extends AbstractTestElement implements SampleLis
 	public static String FIELD_MONGODB_CONFIG_NAME = "mongoDBConfigName";
 	public static String FIELD_MONGODB_COLLECTION_NAME = "mongoDBCollectionName";
 	public static String FIELD_RESULT_VAR_NAME = "resultVarName";
+	public static String FIELD_SUCCESS_ONLY = "successOnly";
+	public static String FIELD_ERRORS_ONLY = "errorsOnly";
 
     public MongoDBResultSaver() {
         super();
@@ -83,9 +85,26 @@ public class MongoDBResultSaver extends AbstractTestElement implements SampleLis
 	public void setResultVarName(String resultVarName){
 		this.setProperty(FIELD_RESULT_VAR_NAME, resultVarName);
 	}
+	
+	public boolean isSuccessOnly(){
+		return this.getPropertyAsBoolean(FIELD_SUCCESS_ONLY);
+	}
+	
+	public boolean isErrorsOnly(){
+		return this.getPropertyAsBoolean(FIELD_ERRORS_ONLY);
+	}
 
 	@Override
 	public void sampleOccurred(SampleEvent e) {
+		if (e.getResult().isSuccessful()){
+            if (isErrorsOnly()){
+                return;
+            }
+        } else {
+            if (isSuccessOnly()){
+                return;
+            }
+        }
 		JMeterVariables variables = JMeterContextService.getContext().getVariables();
 		MongoDBConfig config = (MongoDBConfig)variables.getObject(this.getMongoDBConfigName());
 		if(config == null){
