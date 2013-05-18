@@ -1,23 +1,19 @@
 package com.jolestar.jmeter.mongodb.gui;
 
 import java.awt.BorderLayout;
-import java.util.MissingResourceException;
+import java.awt.GridLayout;
 import java.util.ResourceBundle;
 
 import javax.swing.Box;
-import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.apache.jmeter.reporters.ResultSaver;
 import org.apache.jmeter.samplers.Clearable;
-import org.apache.jmeter.testelement.AbstractTestElement;
 import org.apache.jmeter.testelement.TestElement;
-import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jmeter.visualizers.gui.AbstractListenerGui;
-import org.apache.jorphan.gui.JLabeledTextField;
 
+import com.jolestar.jmeter.mongodb.MongoDBConfigBeanInfo;
 import com.jolestar.jmeter.mongodb.MongoDBResultSaver;
 
 /**
@@ -34,9 +30,11 @@ public class MongoDBResultSaverGui extends AbstractListenerGui implements Cleara
 	private static final long serialVersionUID = 9150131463742788845L;
 
 	private JTextField mongoConfigName;
+	private JTextField mongoCollectionName;
 	
 	private static final String PROP_DISPLAY_NAME = "displayName";
 	private static final String PROP_SHORT_DESCRIPTION = "shortDescription";
+
     
 	/**
 	 * resourceBundle need to be static. because getStaticLabel method be called at super() construct. 
@@ -71,9 +69,8 @@ public class MongoDBResultSaverGui extends AbstractListenerGui implements Cleara
     public void configure(TestElement el) {
         super.configure(el);
        
-        
         this.mongoConfigName.setText(el.getPropertyAsString(MongoDBResultSaver.FIELD_MONGODB_CONFIG_NAME));
-        
+        this.mongoCollectionName.setText(el.getPropertyAsString(MongoDBResultSaver.FIELD_MONGODB_COLLECTION_NAME));
     }
 
     /**
@@ -95,6 +92,7 @@ public class MongoDBResultSaverGui extends AbstractListenerGui implements Cleara
     public void modifyTestElement(TestElement te) {
         super.configureTestElement(te);
         te.setProperty(MongoDBResultSaver.FIELD_MONGODB_CONFIG_NAME, this.mongoConfigName.getText());
+        te.setProperty(MongoDBResultSaver.FIELD_MONGODB_COLLECTION_NAME,this.mongoCollectionName.getText());
     }
 
     /**
@@ -104,6 +102,7 @@ public class MongoDBResultSaverGui extends AbstractListenerGui implements Cleara
     public void clearGui() {
         super.clearGui();
         this.mongoConfigName.setText("");
+        this.mongoCollectionName.setText("");
     }
 
     private void init() {
@@ -117,11 +116,13 @@ public class MongoDBResultSaverGui extends AbstractListenerGui implements Cleara
 
     private JPanel createPanel()
     {
+    	JPanel panel = new JPanel(new GridLayout(2,2));
     	String labelStr = resourceBundle.getString(MongoDBResultSaver.FIELD_MONGODB_CONFIG_NAME+"."+PROP_DISPLAY_NAME);
         JLabel label = new JLabel(labelStr); 
 
         mongoConfigName = new JTextField(10);
         mongoConfigName.setName(MongoDBResultSaver.FIELD_MONGODB_CONFIG_NAME);
+        
         String tipName = MongoDBResultSaver.FIELD_MONGODB_CONFIG_NAME+"."+PROP_SHORT_DESCRIPTION;
         if(resourceBundle.containsKey(tipName)){
         	String tip = resourceBundle.getString(tipName);
@@ -129,10 +130,25 @@ public class MongoDBResultSaverGui extends AbstractListenerGui implements Cleara
         }
         
         label.setLabelFor(mongoConfigName);
+        
+        panel.add(label);
+        panel.add(mongoConfigName);
+        
+        labelStr = resourceBundle.getString(MongoDBResultSaver.FIELD_MONGODB_COLLECTION_NAME+"."+PROP_DISPLAY_NAME);
+        label = new JLabel(labelStr); 
+        mongoCollectionName = new JTextField(10);
+        mongoCollectionName.setName(MongoDBResultSaver.FIELD_MONGODB_COLLECTION_NAME);
+        tipName = MongoDBResultSaver.FIELD_MONGODB_COLLECTION_NAME+"."+PROP_SHORT_DESCRIPTION;
+        if(resourceBundle.containsKey(tipName)){
+        	String tip = resourceBundle.getString(tipName);
+        	mongoCollectionName.setToolTipText(tip);
+        }
+        
+        label.setLabelFor(mongoCollectionName);
+ 
+        panel.add(label);
+        panel.add(mongoCollectionName);
 
-        JPanel panel = new JPanel(new BorderLayout(5, 0));
-        panel.add(label, BorderLayout.WEST);
-        panel.add(mongoConfigName, BorderLayout.CENTER);
         return panel;
     }
 

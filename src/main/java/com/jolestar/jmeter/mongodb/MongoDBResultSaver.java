@@ -3,14 +3,24 @@
  */
 package com.jolestar.jmeter.mongodb;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
+
 import org.apache.jmeter.samplers.SampleEvent;
 import org.apache.jmeter.samplers.SampleListener;
-import org.apache.jmeter.testbeans.TestBean;
 import org.apache.jmeter.testelement.AbstractTestElement;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBObjectBuilder;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 
 /**
  * @author jolestar
@@ -27,12 +37,14 @@ public class MongoDBResultSaver extends AbstractTestElement implements SampleLis
 	
 	
 	public static String FIELD_MONGODB_CONFIG_NAME = "mongoDBConfigName";
+	public static String FIELD_MONGODB_COLLECTION_NAME = "mongoDBCollectionName";
 	
-	
-
+	private static final String DEFAULT_MONGO_DB_COLLECTION = "jmeter";
 
     public MongoDBResultSaver() {
         super();
+        this.setMongoDBConfigName(MongoDBConfigBeanInfo.Field.varName.defaultValue().toString());
+        this.setMongoDBCollectionName(DEFAULT_MONGO_DB_COLLECTION);
     }
 
     /*
@@ -57,16 +69,45 @@ public class MongoDBResultSaver extends AbstractTestElement implements SampleLis
 	public void setMongoDBConfigName(String mongoDBConfigName) {
 		this.setProperty(FIELD_MONGODB_CONFIG_NAME, mongoDBConfigName);
 	}
+	
+	public String getMongoDBCollectionName(){
+		return this.getPropertyAsString(FIELD_MONGODB_COLLECTION_NAME);
+	}
+	
+	public void setMongoDBCollectionName(String mongoDBCollectionName){
+		this.setProperty(FIELD_MONGODB_COLLECTION_NAME, mongoDBCollectionName);
+	}
 
 	@Override
 	public void sampleOccurred(SampleEvent e) {
 		JMeterVariables variables = JMeterContextService.getContext().getVariables();
-		Object mongo = variables.getObject(this.getMongoDBConfigName());
-		if(mongo == null){
+		MongoDBConfig config = (MongoDBConfig)variables.getObject(this.getMongoDBConfigName());
+		if(config == null){
 			log.error("can not find mongo db config with name:"+this.getMongoDBConfigName());
 		}else{
-			log.info("save result to mongodb :"+mongo.toString());
+			log.info("save result to mongodb :"+config.toString());
+			String str = e.getResult().getResponseDataAsString();
+			JSONParser parser = new JSONParser(JSONParser.MODE_JSON_SIMPLE);
+			DBCollection collection = config.getCollection(this.getMongoDBCollectionName());
+			try {
+				Object obj = parser.parse(str);
+				saveObject(obj, collection);
+			} catch (ParseException ex) {
+				log.error("parse json error:"+ex.getMessage()+", responseStr:"+str);
+			}
 		}
+	}
+	
+	private void saveObject(Object obj,DBCollection collection){
+		Map map = null;
+		if(obj instanceof Map){
+			map = (Map)obj;
+		}else{
+			map = new HashMap<String, Object>();
+			map.put("result", obj);
+		}
+		DBObject dbObject = new BasicDBObject(map);
+		collection.insert(dbObject);
 	}
 
 	@Override

@@ -15,8 +15,7 @@ import org.apache.jmeter.testbeans.BeanInfoSupport;
 public class MongoDBConfigBeanInfo extends BeanInfoSupport {
 
 	public static enum Field {
-		varName("mongodb"), host("localhost"), port(27017), db("test"), collection(
-				"jmeter"), username(""), password("");
+		varName("mongodb"), host("localhost"), port(27017), dbName("test"),username(""), password("");
 		private Object defaultValue;
 
 		private Field(Object defaultValue) {
@@ -32,7 +31,7 @@ public class MongoDBConfigBeanInfo extends BeanInfoSupport {
 		super(MongoDBConfig.class);
 		
 		createPropertyGroup("mongo_db_config_var", new String[]{Field.varName.name()});
-		createPropertyGroup("mongo_db_config", new String[]{Field.host.name(),Field.port.name(),Field.db.name(),Field.collection.name(),Field.username.name(),Field.password.name()});
+		createPropertyGroup("mongo_db_config", new String[]{Field.host.name(),Field.port.name(),Field.dbName.name(),Field.username.name(),Field.password.name()});
 		//createPropertyGroup("Mongo Server auth", new String[]{Field.username.name(),Field.password.name()});
 		
 		PropertyDescriptor p;

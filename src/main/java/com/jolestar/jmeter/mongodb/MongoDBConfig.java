@@ -2,6 +2,7 @@ package com.jolestar.jmeter.mongodb;
 
 import java.net.UnknownHostException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.config.ConfigElement;
 import org.apache.jmeter.config.ConfigTestElement;
 import org.apache.jmeter.engine.util.NoConfigMerge;
@@ -30,11 +31,10 @@ public class MongoDBConfig extends ConfigTestElement implements ConfigElement, T
 	private transient String varName;
 	private transient String host;
 	private transient int port;
-	private transient String db;
-	private transient String collection;
+	private transient String dbName;
 	private transient String username;
 	private transient String password;
-
+	private transient DB dbInstance;
 	
 
 	public String getVarName() {
@@ -62,21 +62,14 @@ public class MongoDBConfig extends ConfigTestElement implements ConfigElement, T
 		this.port = port;
 	}
 
-	public String getDb() {
-		return db;
+	public String getDbName() {
+		return dbName;
 	}
 
-	public void setDb(String db) {
-		this.db = db;
+	public void setDbName(String db) {
+		this.dbName = db;
 	}
 
-	public String getCollection() {
-		return collection;
-	}
-
-	public void setCollection(String collection) {
-		this.collection = collection;
-	}
 
 	public String getUsername() {
 		return username;
@@ -94,12 +87,15 @@ public class MongoDBConfig extends ConfigTestElement implements ConfigElement, T
 		this.password = password;
 	}
 	
+	public String getIdentityString(){
+		return this.host+":"+this.port+"/"+this.dbName;
+	}
 
 
 	@Override
 	public void testEnded() {
 		// TODO close mongodb
-		log.info("close mongo db :" + this.varName);
+		log.info("close mongo dbName :" + this.varName);
 	}
 
 	@Override
@@ -115,16 +111,25 @@ public class MongoDBConfig extends ConfigTestElement implements ConfigElement, T
 			log.error("Test error: Multiple MongoDB config called " + varName);
 			return;
 		}
-		log.info("create mongo db config :" + this.toString());
+		log.info("create mongo dbName config :" + this.toString());
 		
 		try {
-			DB db = Mongo.connect(new DBAddress(this.getHost(), this.getPort(), this.getDb()));
-			DBCollection collection = db.getCollection(this.getCollection());
-			variables.putObject(varName, collection);
+			this.dbInstance = Mongo.connect(new DBAddress(this.getHost(), this.getPort(), this.getDbName()));
+			if(!StringUtils.isBlank(this.getUsername()) && !StringUtils.isBlank(this.getPassword())){
+				boolean result = this.dbInstance.authenticate(this.getUsername(), this.getPassword().toCharArray());
+				if(!result){
+					log.error("authenticate to "+this.getIdentityString()+" fail.");
+				}
+			}
+			variables.putObject(varName, this);
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("connect to "+this.getIdentityString()+" fail. msg:"+e.getMessage());
 		}
+	}
+	
+	public DBCollection getCollection(String collectionName){
+		DBCollection collection = this.dbInstance.getCollection(collectionName);
+		return collection;
 	}
 
 	@Override
@@ -136,8 +141,8 @@ public class MongoDBConfig extends ConfigTestElement implements ConfigElement, T
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("MongoDBConfig [varName=").append(varName).append(", host=")
-				.append(host).append(", port=").append(port).append(", db=")
-				.append(db).append(", collection=").append(collection)
+				.append(host).append(", port=").append(port).append(", dbName=")
+				.append(dbName)
 				.append(", username=").append(username).append(", password=")
 				.append(password).append("]");
 		return builder.toString();
