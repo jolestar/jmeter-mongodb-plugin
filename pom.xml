@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.jolestar</groupId>
 	<artifactId>jmeter-mongodb-plugin</artifactId>
@@ -8,6 +9,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java-version>1.6</java-version>
 		<jmeter.version>2.8</jmeter.version>
+		<!-- github server corresponds to entry in ~/.m2/settings.xml -->
+		<github.global.server>github</github.global.server>
 	</properties>
 
 	<scm>
@@ -110,8 +113,34 @@
 				<artifactId>maven-deploy-plugin</artifactId>
 				<version>2.7</version>
 				<configuration>
-					<altDeploymentRepository>internal.repo::default::file://${project.basedir}/repo</altDeploymentRepository>
+					<altDeploymentRepository>internal.repo::default::file://${project.build.directory}/mvn-repo</altDeploymentRepository>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.github.github</groupId>
+				<artifactId>site-maven-plugin</artifactId>
+				<version>0.8</version>
+				<configuration>
+					<message>Maven artifacts for ${project.artifactId}
+						${project.version}</message>  <!-- git commit message -->
+					<noJekyll>true</noJekyll>                                  <!-- disable webpage processing -->
+					<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> <!-- matches distribution management repository url above -->
+					<branch>refs/heads/mvn-repo</branch>                       <!-- remote branch name -->
+					<includes>
+						<include>**/*</include>
+					</includes>
+					<!-- <repositoryName>mvn-repo</repositoryName> <repositoryOwner>jolestar</repositoryOwner> -->
+				</configuration>
+				<executions>
+					<!-- run site-maven-plugin's 'site' target as part of the build's normal 
+						'deploy' phase -->
+					<execution>
+						<goals>
+							<goal>site</goal>
+						</goals>
+						<phase>deploy</phase>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 		<pluginManagement>
@@ -150,7 +179,7 @@
 		<repository>
 			<id>github</id>
 			<name>GitHub ${project.artifactId} Repository</name>
-			<url>https://raw.github.com/jolestar/${project.artifactId}/repo</url>
+			<url>https://raw.github.com/jolestar/${project.artifactId}/mvn-repo</url>
 		</repository>
 	</distributionManagement>
 
