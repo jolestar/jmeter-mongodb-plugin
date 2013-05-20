@@ -12,8 +12,8 @@
 	</properties>
 
 	<scm>
-		<connection>scm:git:ssh//git@github.com:jolestar/jmeter-mongodb-plugin.git</connection>
-		<developerConnection>scm:git:ssh//git@github.com:jolestar/jmeter-mongodb-plugin.git</developerConnection>
+		<connection>scm:git:git@github.com:jolestar/jmeter-mongodb-plugin.git</connection>
+		<developerConnection>scm:git:git@github.com:jolestar/jmeter-mongodb-plugin.git</developerConnection>
 		<url>https://github.com/jolestar/jmeter-mongodb-plugin</url>
 	</scm>
 
