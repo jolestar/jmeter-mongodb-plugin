@@ -3,6 +3,7 @@
  */
 package com.jolestar.jmeter.mongodb;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +20,6 @@ import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
@@ -42,6 +42,7 @@ public class MongoDBResultSaver extends AbstractTestElement implements SampleLis
 	public static String FIELD_RESULT_VAR_NAME = "resultVarName";
 	public static String FIELD_SUCCESS_ONLY = "successOnly";
 	public static String FIELD_ERRORS_ONLY = "errorsOnly";
+	public static String FIELD_OBJECT_ID_NAME = "objectIdName";
 
     public MongoDBResultSaver() {
         super();
@@ -93,6 +94,10 @@ public class MongoDBResultSaver extends AbstractTestElement implements SampleLis
 	public boolean isErrorsOnly(){
 		return this.getPropertyAsBoolean(FIELD_ERRORS_ONLY);
 	}
+	
+	public String getObjectIdName(){
+		return this.getPropertyAsString(FIELD_OBJECT_ID_NAME);
+	}
 
 	@Override
 	public void sampleOccurred(SampleEvent e) {
@@ -117,7 +122,7 @@ public class MongoDBResultSaver extends AbstractTestElement implements SampleLis
 			}else{
 				result = variables.get(this.getResultVarName());
 			}
-			if(StringUtils.isBlank(result)){
+			if(StringUtils.isBlank(result)||"NULL".equalsIgnoreCase(result)){
 				log.error("result is blank.");
 			}else{
 				if(log.isDebugEnabled()){
@@ -135,16 +140,28 @@ public class MongoDBResultSaver extends AbstractTestElement implements SampleLis
 		}
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void saveObject(Object obj,DBCollection collection){
 		Map map = null;
 		if(obj instanceof Map){
 			map = (Map)obj;
+			String objectIdName = this.getObjectIdName();
+			if(!StringUtils.isBlank(objectIdName)){
+				Object id = map.get(objectIdName);
+				if(id != null){
+					map = new HashMap(map);
+					map.put("_id", id);
+				}else{
+					log.warn("can not find id by name:"+objectIdName);
+				}
+			}
 		}else{
 			map = new HashMap<String, Object>();
 			map.put("result", obj);
 		}
+		map.put("_jmeter_update_time", new Date());
 		DBObject dbObject = new BasicDBObject(map);
-		collection.insert(dbObject);
+		collection.save(dbObject);
 	}
 
 	@Override
