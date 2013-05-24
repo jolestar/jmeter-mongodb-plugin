@@ -94,8 +94,11 @@ public class MongoDBConfig extends ConfigTestElement implements ConfigElement, T
 
 	@Override
 	public void testEnded() {
-		// TODO close mongodb
 		log.info("close mongo dbName :" + this.varName);
+		JMeterVariables variables = JMeterContextService.getContext()
+				.getVariables();
+		variables.remove(this.varName);
+		this.dbInstance.getMongo().close();
 	}
 
 	@Override
