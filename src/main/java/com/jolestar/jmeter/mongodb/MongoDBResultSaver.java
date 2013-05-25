@@ -43,6 +43,7 @@ public class MongoDBResultSaver extends AbstractTestElement implements SampleLis
 	public static String FIELD_SUCCESS_ONLY = "successOnly";
 	public static String FIELD_ERRORS_ONLY = "errorsOnly";
 	public static String FIELD_OBJECT_ID_NAME = "objectIdName";
+	public static String FIELD_OBJECT_ID_VAR_NAME = "objectIdVarName";
 
     public MongoDBResultSaver() {
         super();
@@ -98,6 +99,10 @@ public class MongoDBResultSaver extends AbstractTestElement implements SampleLis
 	public String getObjectIdName(){
 		return this.getPropertyAsString(FIELD_OBJECT_ID_NAME);
 	}
+	
+	public String getObjectIdVarName(){
+		return this.getPropertyAsString(FIELD_OBJECT_ID_VAR_NAME);
+	}
 
 	@Override
 	public void sampleOccurred(SampleEvent e) {
@@ -146,14 +151,24 @@ public class MongoDBResultSaver extends AbstractTestElement implements SampleLis
 		if(obj instanceof Map){
 			map = (Map)obj;
 			String objectIdName = this.getObjectIdName();
+			Object id = null;
 			if(!StringUtils.isBlank(objectIdName)){
-				Object id = map.get(objectIdName);
-				if(id != null){
-					map = new HashMap(map);
-					map.put("_id", id);
-				}else{
-					log.warn("can not find id by name:"+objectIdName);
+				id = map.get(objectIdName);
+				if(id == null){
+					log.warn("can not find id by field name:"+objectIdName);
 				}
+			}
+			String objectIdVarName = this.getObjectIdVarName();
+			if(!StringUtils.isBlank(objectIdVarName) && id == null){
+				JMeterVariables variables = JMeterContextService.getContext().getVariables();
+				id = variables.getObject(objectIdVarName);
+				if(id == null){
+					log.warn("can not find id by var name:"+objectIdVarName);
+				}
+			}
+			if(id != null){
+				map = new HashMap(map);
+				map.put("_id", id);
 			}
 		}else{
 			map = new HashMap<String, Object>();
