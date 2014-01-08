@@ -28,3 +28,7 @@ latest version: 0.4
 ![mongo db config](./screenshots/config.png)
 
 ![mongo db result saver](./screenshots/result-saver.png)
+
+## more info about jemeter plugin dev
+
+[jmeter-plugin-develop](http://jolestar.com/jmeter-plugin-develop/)
